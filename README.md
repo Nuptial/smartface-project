@@ -5,11 +5,12 @@ Bu projeyi çalıştırmak için öncelikle bilgisayarınıza Docker kurulu olma
 
 Ayrıca, aşağıdaki portların boş olduğundan emin olun:
 
-- `8080`
-- `8081`
-- `3000`
-- `9090`
-- `3001`
+- `8080` (OpenFGA)
+- `8081` (OpenFGA)
+- `3000` (OpenFGA)
+- `9090` (Keycloak)
+- `3001` (Uygulama)
+- `3002` (Websocket)
 
 ## Kurulum
 Aşağıdaki komutları terminalde çalıştırın:
@@ -103,11 +104,12 @@ Ensure that Docker is installed on your machine.
 
 Also, make sure that the following ports are free:
 
-- `8080`
-- `8081`
-- `3000`
-- `9090`
-- `3001`
+- `8080` (OpenFGA)
+- `8081` (OpenFGA)
+- `3000` (OpenFGA)
+- `9090` (Keycloak)
+- `3001` (Application)
+- `3002` (Websocket)
 
 ## Installation
 Run the following commands in the terminal:
