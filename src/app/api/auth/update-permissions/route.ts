@@ -26,12 +26,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Token'dan kullanıcı bilgilerini al
+    // Get user information from token
     const token = authHeader.split(' ')[1];
     const tokenData = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
     const currentUsername = tokenData.preferred_username;
 
-    // Admin kontrolü yap
+    // Check admin permissions
     const checkEditPermissionBody = {
       authorization_model_id: MODEL_ID,
       tuple_key: {
@@ -82,12 +82,12 @@ export async function POST(request: NextRequest) {
     const canAssignEdit = editPermissionData.allowed;
     const canAssignDelete = deletePermissionData.allowed;
 
-    // Eğer hiçbir yetki atama izni yoksa hata dön
+    // If there are no permission assignment rights, return error
     if (!canAssignEdit && !canAssignDelete) {
       return NextResponse.json({ error: 'You do not have permission to assign roles' }, { status: 403 });
     }
 
-    // Request body'den yetki güncellemelerini al
+    // Get permission updates from request body
     const body = await request.json();
     const { username, canEdit, canDelete } = body;
 
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Username is required' }, { status: 400 });
     }
 
-    // Mevcut yetkileri kontrol et
+    // Check current permissions
     const [currentEditPermission, currentDeletePermission] = await Promise.all([
       fetch(`${OPENFGA_URL}/stores/${STORE_ID}/check`, {
         method: 'POST',
@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
     const hasEditPermission = currentEditPermission.allowed;
     const hasDeletePermission = currentDeletePermission.allowed;
 
-    // Yetkileri güncelle
+    // Update permissions
     const writeBody: Partial<WriteRequestBody> = {
       authorization_model_id: MODEL_ID,
     };
@@ -134,17 +134,17 @@ export async function POST(request: NextRequest) {
     const writes: TupleKey[] = [];
     const deletes: TupleKey[] = [];
 
-    // can_edit yetkisi - sadece can_assign_edit yetkisi varsa değiştirilebilir
+    // can_edit permission - can only be changed if can_assign_edit permission exists
     if (canAssignEdit) {
       if (canEdit && !hasEditPermission) {
-        // Yetkiyi ekle (sadece yoksa)
+        // Add permission (only if it doesn't exist)
         writes.push({
           user: `person:${username}`,
           relation: 'can_edit',
           object: 'application:default'
         });
       } else if (canEdit === false && hasEditPermission) {
-        // Yetkiyi kaldır (checkbox uncheck edildiğinde)
+        // Remove permission (when checkbox is unchecked)
         deletes.push({
           user: `person:${username}`,
           relation: 'can_edit',
@@ -153,17 +153,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // can_delete yetkisi - sadece can_assign_delete yetkisi varsa değiştirilebilir
+    // can_delete permission - can only be changed if can_assign_delete permission exists
     if (canAssignDelete) {
       if (canDelete && !hasDeletePermission) {
-        // Yetkiyi ekle (sadece yoksa)
+        // Add permission (only if it doesn't exist)
         writes.push({
           user: `person:${username}`,
           relation: 'can_delete',
           object: 'application:default'
         });
       } else if (canDelete === false && hasDeletePermission) {
-        // Yetkiyi kaldır (checkbox uncheck edildiğinde)
+        // Remove permission (when checkbox is unchecked)
         deletes.push({
           user: `person:${username}`,
           relation: 'can_delete',
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Sadece gerekli alanları ekle
+    // Only add necessary fields
     if (writes.length > 0) {
       writeBody.writes = { tuple_keys: writes };
     }
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
       writeBody.deletes = { tuple_keys: deletes };
     }
 
-    // Eğer hiçbir değişiklik yoksa başarılı dön
+    // If there are no changes, return success
     if (writes.length === 0 && deletes.length === 0) {
       return NextResponse.json({
         success: true,
@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // OpenFGA'ya yetki güncellemelerini gönder
+    // Send permission updates to OpenFGA
     const writeResponse = await fetch(`${OPENFGA_URL}/stores/${STORE_ID}/write`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

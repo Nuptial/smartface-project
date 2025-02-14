@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { assignUserRole } from '@/config/openfga';
 
 export async function middleware(request: NextRequest) {
-  // Debug için request path'i
+  // For request path debugging
   console.log('Middleware triggered for path:', request.nextUrl.pathname);
 
   const token = request.cookies.get('keycloak-token');
@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
     // Parse the JWT token to get user info
     const tokenData = JSON.parse(atob(token.value.split('.')[1]));
     
-    // Keycloak'tan gelen kullanıcı adını kullan
+    // Use username from Keycloak
     const username = tokenData.preferred_username || tokenData.username || tokenData.sub;
     console.log('Processing role assignment for user:', username);
     
@@ -32,11 +32,11 @@ export async function middleware(request: NextRequest) {
   }
 }
 
-// Middleware'in çalışacağı path'leri belirle
+// Define paths where middleware will run
 export const config = {
   matcher: [
     '/home',
     '/home/:path*',
-    '/api/:path*'  // API rotaları için de çalışsın
+    '/api/:path*'  // Also run for API routes
   ]
 }; 

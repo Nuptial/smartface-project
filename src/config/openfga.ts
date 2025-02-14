@@ -2,12 +2,12 @@ export const OPENFGA_URL = 'http://127.0.0.1:8080';
 export const STORE_ID = "01JM2173C3936ECZQ97E62MAQ8";
 export const MODEL_ID = "01JM25TV04NV7D7SGHSH8S5J4Y";
 
-// Admin kullanıcıları kontrol etmek için kullanılacak
-const ADMIN_USERS = new Set(['admin']); // Keycloak admin kullanıcısı
+// Used to check admin users
+const ADMIN_USERS = new Set(['admin']); // Keycloak admin user
 
 export const assignUserRole = async (userId: string) => {
   try {
-    // İlk kayıt olan kullanıcı admin mi kontrol et
+    // Check if the first registered user is admin
     const isAdmin = ADMIN_USERS.has(userId);
     
     console.log('Assigning role:', { userId, isAdmin });
@@ -43,7 +43,7 @@ export const assignUserRole = async (userId: string) => {
     return true;
   } catch (error) {
     console.error('Error assigning role in OpenFGA:', error);
-    throw error;
+    return false; // Return false in case of error
   }
 };
 
@@ -90,16 +90,16 @@ export const checkUserRole = async (userId: string, role: 'admin' | 'user') => {
   }
 };
 
-// Yeni admin eklemek için kullanılacak fonksiyon
+// Function to add new admin
 export const addAdminUser = async (adminId: string, currentUserId: string) => {
   try {
-    // Önce mevcut kullanıcının admin olup olmadığını kontrol et
+    // First check if the current user is admin
     const isAdmin = await checkUserRole(currentUserId, 'admin');
     if (!isAdmin) {
       throw new Error('Only admins can add new admins');
     }
 
-    // Kullanıcının zaten admin olup olmadığını kontrol et
+    // Check if the user is already admin
     const isAlreadyAdmin = await checkUserRole(adminId, 'admin');
     if (isAlreadyAdmin) {
       console.log('User is already an admin:', adminId);
