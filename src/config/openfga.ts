@@ -12,34 +12,32 @@ export const assignUserRole = async (userId: string) => {
     
     console.log('Assigning role:', { userId, isAdmin });
 
-    if (isAdmin) {
-      const writeBody = {
-        authorization_model_id: MODEL_ID,
-        writes: {
-          tuple_keys: [{
-            user: `person:${userId}`,
-            relation: 'admin',
-            object: 'application:default'
-          }]
-        }
-      };
-
-      console.log('Request body:', JSON.stringify(writeBody));
-
-      const response = await fetch(`${OPENFGA_URL}/stores/${STORE_ID}/write`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(writeBody)
-      });
-
-      const responseText = await response.text();
-      console.log('OpenFGA Response:', responseText);
-
-      if (!response.ok) {
-        throw new Error(`OpenFGA Error: ${responseText}`);
+    const writeBody = {
+      authorization_model_id: MODEL_ID,
+      writes: {
+        tuple_keys: [{
+          user: `person:${userId}`,
+          relation: isAdmin ? 'admin' : 'user',
+          object: 'application:default'
+        }]
       }
+    };
+
+    console.log('Request body:', JSON.stringify(writeBody));
+
+    const response = await fetch(`${OPENFGA_URL}/stores/${STORE_ID}/write`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(writeBody)
+    });
+
+    const responseText = await response.text();
+    console.log('OpenFGA Response:', responseText);
+
+    if (!response.ok) {
+      throw new Error(`OpenFGA Error: ${responseText}`);
     }
 
     return true;
