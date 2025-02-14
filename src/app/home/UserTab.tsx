@@ -65,14 +65,16 @@ export default function UserTab({ users, onSaveUsers, onEditCheckboxChange, onRe
                   <TableCell>{user.lastName}</TableCell>
                   <TableCell>
                     <Checkbox
-                      checked={user.editSelected}
+                      checked={user.editSelected || false}
                       onChange={() => onEditCheckboxChange(user.id)}
+                      indeterminate={user.editSelected === undefined}
                     />
                   </TableCell>
                   <TableCell>
                     <Checkbox
-                      checked={user.removeSelected}
+                      checked={user.removeSelected || false}
                       onChange={() => onRemoveCheckboxChange(user.id)}
+                      indeterminate={user.removeSelected === undefined}
                     />
                   </TableCell>
                 </TableRow>

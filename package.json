@@ -15,10 +15,15 @@
     "@mui/icons-material": "^6.4.4",
     "@mui/material": "^6.4.4",
     "@mui/material-nextjs": "^6.4.3",
+    "@openfga/sdk": "^0.8.0",
     "@react-keycloak/web": "^3.4.0",
+    "@types/ws": "^8.5.14",
+    "bufferutil": "^4.0.9",
     "keycloak-js": "^26.1.2",
     "next": "15.1.7",
-    "react": "^19.0.0"
+    "react": "^19.0.0",
+    "utf-8-validate": "^6.0.5",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

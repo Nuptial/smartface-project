@@ -8,7 +8,9 @@ import {
   Box, 
   Tabs, 
   Tab,
-  CircularProgress
+  CircularProgress,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import Header from '../../components/Header';
 import CarTab from './CarTab';
@@ -65,6 +67,9 @@ export default function HomePage() {
   const [cars, setCars] = useState<Car[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<'admin' | 'user' | null>(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   useEffect(() => {
     if (initialized && !keycloak.authenticated) {
@@ -76,10 +81,43 @@ export default function HomePage() {
   useEffect(() => {
     if (initialized && keycloak.authenticated) {
       setIsRedirecting(false);
-      fetchUsers();
       fetchCars();
+      if (userRole === 'admin') {
+        fetchUsers();
+      }
     }
-  }, [initialized, keycloak.authenticated]);
+  }, [initialized, keycloak.authenticated, userRole]);
+
+  useEffect(() => {
+    const assignRole = async () => {
+      if (initialized && keycloak.authenticated && keycloak.token) {
+        try {
+          console.log('Attempting to assign/check role...');
+          const response = await fetch('/api/auth/assign-role', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${keycloak.token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (!response.ok) {
+            console.error('Role assignment failed:', data);
+            throw new Error(data.error || 'Failed to assign role');
+          }
+
+          console.log('Role assignment successful:', data);
+          setUserRole(data.role);
+        } catch (error) {
+          console.error('Error in role assignment:', error);
+        }
+      }
+    };
+
+    assignRole();
+  }, [initialized, keycloak.authenticated, keycloak.token]);
 
   const fetchCars = async () => {
     try {
@@ -110,11 +148,34 @@ export default function HomePage() {
       );
       if (response.ok) {
         const data = await response.json();
-        setUsers(data.map((user: any) => ({
-          ...user,
-          editSelected: false,
-          removeSelected: false
-        })));
+        const filteredUsers = data.filter((user: any) => user.username !== 'admin');
+        
+        // Her kullanıcı için yetkileri kontrol et
+        const usersWithPermissions = await Promise.all(
+          filteredUsers.map(async (user: any) => {
+            const permissionsResponse = await fetch(`/api/auth/check-permissions?username=${user.username}`, {
+              headers: {
+                Authorization: `Bearer ${keycloak.token}`,
+              },
+            });
+            
+            if (permissionsResponse.ok) {
+              const permissions = await permissionsResponse.json();
+              return {
+                ...user,
+                editSelected: permissions.canEdit || false,
+                removeSelected: permissions.canDelete || false
+              };
+            }
+            return {
+              ...user,
+              editSelected: false,
+              removeSelected: false
+            };
+          })
+        );
+
+        setUsers(usersWithPermissions);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -185,12 +246,54 @@ export default function HomePage() {
     ));
   };
 
-  const handleSaveUsers = () => {
-    // Implement user save logic here
-    console.log('Saving user changes...');
+  const handleSaveUsers = async () => {
+    try {
+      // Seçili kullanıcıları bul
+      const usersToUpdate = users.filter(user => 
+        user.editSelected !== undefined || user.removeSelected !== undefined
+      );
+
+      // Her bir kullanıcı için yetkileri güncelle
+      for (const user of usersToUpdate) {
+        const response = await fetch('/api/auth/update-permissions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${keycloak.token}`
+          },
+          body: JSON.stringify({
+            username: user.username,
+            canEdit: user.editSelected || false,
+            canDelete: user.removeSelected || false
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to update permissions for ${user.username}`);
+        }
+      }
+
+      // Başarılı mesajı göster
+      setSnackbarMessage('User permissions updated successfully');
+      setOpenSnackbar(true);
+      
+      // Kullanıcı listesini yenile
+      await fetchUsers();
+    } catch (error) {
+      console.error('Error saving user permissions:', error);
+      setSnackbarMessage('Failed to update permissions');
+      setOpenSnackbar(true);
+    }
   };
 
-  if (isRedirecting || !initialized) {
+  const handleCloseSnackbar = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
+  if (isRedirecting || !initialized || !userRole) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
         <CircularProgress />
@@ -202,32 +305,61 @@ export default function HomePage() {
     <>
       <Header username={keycloak.tokenParsed?.preferred_username} onLogout={handleLogout} />
       <Container maxWidth="lg" sx={{ mt: 4 }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tabValue} onChange={handleTabChange}>
-            <Tab label="Cars" />
-            <Tab label="Users" />
-          </Tabs>
-        </Box>
+        {userRole === 'admin' ? (
+          <>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Tabs value={tabValue} onChange={handleTabChange}>
+                <Tab label="Cars" />
+                <Tab label="Users" />
+              </Tabs>
+            </Box>
 
-        <TabPanel value={tabValue} index={0}>
-          <CarTab
-            cars={cars}
-            isLoading={isLoading}
-            error={error}
-            onEditCar={handleEditCar}
-            onDeleteCar={handleDeleteCar}
-          />
-        </TabPanel>
+            <TabPanel value={tabValue} index={0}>
+              <CarTab
+                cars={cars}
+                isLoading={isLoading}
+                error={error}
+                onEditCar={handleEditCar}
+                onDeleteCar={handleDeleteCar}
+              />
+            </TabPanel>
 
-        <TabPanel value={tabValue} index={1}>
-          <UserTab
-            users={users}
-            onSaveUsers={handleSaveUsers}
-            onEditCheckboxChange={handleUserEditCheckboxChange}
-            onRemoveCheckboxChange={handleUserRemoveCheckboxChange}
-          />
-        </TabPanel>
+            <TabPanel value={tabValue} index={1}>
+              <UserTab
+                users={users}
+                onSaveUsers={handleSaveUsers}
+                onEditCheckboxChange={handleUserEditCheckboxChange}
+                onRemoveCheckboxChange={handleUserRemoveCheckboxChange}
+              />
+            </TabPanel>
+          </>
+        ) : (
+          <Box>
+            <CarTab
+              cars={cars}
+              isLoading={isLoading}
+              error={error}
+              onEditCar={handleEditCar}
+              onDeleteCar={handleDeleteCar}
+            />
+          </Box>
+        )}
       </Container>
+
+      <Snackbar 
+        open={openSnackbar} 
+        autoHideDuration={3000} 
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbarMessage.includes('Failed') ? 'error' : 'success'} 
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 } 
