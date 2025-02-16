@@ -13,10 +13,10 @@ Ayrıca, aşağıdaki portların boş olduğundan emin olun:
 - `3002` (Websocket)
 
 ## Kurulum
-Aşağıdaki komutları terminalde çalıştırın:
+Root klasoründe docker-compose up komutunun çalıştırılması gerekiyor.
 
 ```sh
-Root klasoründe docker-compose up komutunun çalıştırılması gerekiyor
+docker-compose up
 ```
 
 ## Uygulama URL'leri
@@ -103,10 +103,10 @@ Also, make sure that the following ports are free:
 - `3002` (Websocket)
 
 ## Installation
-Run the following commands in the terminal:
+The docker-compose up command needs to be executed in the root directory.
 
 ```sh
-The docker-compose up command needs to be executed in the root directory.
+docker-compose up
 ```
 
 
