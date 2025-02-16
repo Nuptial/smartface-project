@@ -87,11 +87,6 @@ Uygulama iki farklı rol tanımlar:
 - Yetkiye sahip kullanıcılar, düzenleme ve silme işlemleri yapabilir.
 - Kullanıcının yetkisi güncellendiğinde anlık bildirim gönderilir ve arayüz buna göre güncellenir.
 
-### Admin Giriş Bilgileri
-
-username: admin
-password: admin
-
 ---
 
 # Project Documentation
