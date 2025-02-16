@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  openfga:
+    image: openfga/openfga:latest
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "3000:3000"
+    command: run
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    ports:
+      - "9090:8080"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    command: start-dev
+
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    ports:
+      - "4318:4318"
+    volumes:
+      - ./otel-config.yaml:/etc/otel/config.yaml
+    command: --config /etc/otel/config.yaml 
