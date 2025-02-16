@@ -198,42 +198,6 @@ export default function HomePage() {
     setTabValue(newValue);
   };
 
-  const handleEditCar = async (car: Car) => {
-    try {
-      const response = await fetch('/api/cars', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(car),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update car');
-      }
-
-      await fetchCars();
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to update car');
-    }
-  };
-
-  const handleDeleteCar = async (car: Car) => {
-    try {
-      const response = await fetch(`/api/cars?id=${car.title}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete car');
-      }
-
-      await fetchCars();
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to delete car');
-    }
-  };
-
   const handleUserEditCheckboxChange = (userId: string) => {
     setUsers(users.map(user => 
       user.id === userId ? { ...user, editSelected: !user.editSelected } : user
@@ -319,8 +283,8 @@ export default function HomePage() {
                 cars={cars}
                 isLoading={isLoading}
                 error={error}
-                onEditCar={handleEditCar}
-                onDeleteCar={handleDeleteCar}
+                onEditCar={() => {}}
+                onDeleteCar={() => {}}
               />
             </TabPanel>
 
@@ -339,8 +303,8 @@ export default function HomePage() {
               cars={cars}
               isLoading={isLoading}
               error={error}
-              onEditCar={handleEditCar}
-              onDeleteCar={handleDeleteCar}
+              onEditCar={() => {}}
+              onDeleteCar={() => {}}
             />
           </Box>
         )}
