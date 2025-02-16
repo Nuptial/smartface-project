@@ -12,8 +12,18 @@ body {
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --primary-dark: #1a237e;
+  --primary-light: #534bae;
+  --primary-lighter: #e8eaf6;
+  --background-main: #eef2f6;
+  --background-gradient: #f3f6fa;
+  --background-paper: #ffffff;
+  --text-primary: #1a237e;
+  --text-secondary: #666666;
+  --border-color: #e0e0e0;
+  --success: #4caf50;
+  --error: #d32f2f;
+  --card-shadow: rgba(26, 35, 126, 0.08);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,6 +34,56 @@ body {
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: var(--text-primary);
+  background: var(--background-main);
+  background-image:
+    linear-gradient(135deg, var(--background-main) 0%, var(--background-gradient) 100%);
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(83, 75, 174, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(26, 35, 126, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body.dialog-open {
+  overflow: hidden;
+}
+
+/* Scrollbar stilleri */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+}
+
+/* Seçim stilleri */
+::selection {
+  background: var(--primary-lighter);
+  color: var(--primary-dark);
+}
+
+html {
+  scrollbar-gutter: stable;
 }

@@ -16,7 +16,11 @@ services:
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
-    command: start-dev
+      - KC_HOSTNAME_STRICT=false
+      - KC_HOSTNAME_STRICT_HTTPS=false
+      - KC_HTTP_ENABLED=true
+      - KC_PROXY=edge
+    command: start-dev --hostname=localhost --hostname-strict=false --http-enabled=true --proxy-headers=xforwarded --spi-cors-enabled=true --spi-cors-origins=http://localhost:3001 --spi-cors-methods=POST,PUT,DELETE,GET,OPTIONS --spi-cors-headers=Authorization,Content-Type,Accept --spi-cors-credentials=true --spi-cors-max-age=3600
 
   otel-collector:
     image: otel/opentelemetry-collector:latest

@@ -10,11 +10,74 @@ import {
   Tab,
   CircularProgress,
   Snackbar,
-  Alert
+  Alert,
+  Typography,
+  Paper,
+  styled
 } from '@mui/material';
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import PeopleIcon from '@mui/icons-material/People';
 import Header from '../../components/Header';
 import CarTab from './CarTab';
 import UserTab from './UserTab';
+
+const StyledContainer = styled(Container)(({ theme }) => ({
+  paddingTop: '5rem',
+  paddingBottom: '2rem',
+  position: 'relative',
+  zIndex: 1
+}));
+
+const DashboardHeader = styled(Box)(({ theme }) => ({
+  marginBottom: '2rem',
+  position: 'relative',
+  '& h1': {
+    fontSize: '1.75rem',
+    fontWeight: 500,
+    color: 'var(--text-primary)',
+    marginBottom: '0.25rem'
+  },
+  '& p': {
+    color: 'var(--text-secondary)',
+    fontSize: '0.875rem'
+  }
+}));
+
+const StyledTabs = styled(Tabs)(({ theme }) => ({
+  marginBottom: '2rem',
+  minHeight: 'unset',
+  '& .MuiTabs-indicator': {
+    backgroundColor: 'var(--primary-dark)',
+    height: '2px'
+  }
+}));
+
+const StyledTab = styled(Tab)(({ theme }) => ({
+  textTransform: 'none',
+  fontWeight: 500,
+  fontSize: '0.875rem',
+  color: 'var(--text-secondary)',
+  padding: '0.75rem 1.5rem',
+  minHeight: 'unset',
+  opacity: 0.7,
+  '&.Mui-selected': {
+    color: 'var(--primary-dark)',
+    fontWeight: 500,
+    opacity: 1
+  },
+  '& .MuiSvgIcon-root': {
+    fontSize: '1.25rem',
+    marginRight: '0.5rem',
+    marginBottom: '0'
+  }
+}));
+
+const LoadingContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  minHeight: '400px'
+}));
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -257,73 +320,119 @@ export default function HomePage() {
     setOpenSnackbar(false);
   };
 
-  if (isRedirecting || !initialized || !userRole) {
+  if (isRedirecting || isLoggingOut) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-        <CircularProgress />
-      </Box>
+      <LoadingContainer>
+        <CircularProgress sx={{ color: '#1a237e' }} />
+      </LoadingContainer>
     );
   }
 
   return (
-    <>
-      <Header username={keycloak.tokenParsed?.preferred_username} onLogout={handleLogout} />
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
+    <Box sx={{ 
+      minHeight: '100vh',
+      backgroundColor: 'var(--background-main)',
+      position: 'relative',
+      zIndex: 0
+    }}>
+      <Header 
+        username={keycloak.tokenParsed?.preferred_username} 
+        onLogout={handleLogout} 
+      />
+      <StyledContainer maxWidth="xl">
+        <DashboardHeader>
+          <Typography variant="h1">
+            {userRole === 'admin' ? 'Admin Dashboard' : 'Cars Dashboard'}
+          </Typography>
+          {userRole === 'admin' && (
+            <Typography>
+              Manage your cars and users in one place
+            </Typography>
+          )}
+        </DashboardHeader>
+
         {userRole === 'admin' ? (
           <>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <Tabs value={tabValue} onChange={handleTabChange}>
-                <Tab label="Cars" />
-                <Tab label="Users" />
-              </Tabs>
-            </Box>
+            <StyledTabs
+              value={tabValue}
+              onChange={handleTabChange}
+              aria-label="dashboard tabs"
+            >
+              <StyledTab 
+                icon={<DirectionsCarIcon />}
+                iconPosition="start"
+                label="Cars" 
+                id="tab-0"
+                aria-controls="tabpanel-0"
+              />
+              <StyledTab 
+                icon={<PeopleIcon />}
+                iconPosition="start"
+                label="Users" 
+                id="tab-1"
+                aria-controls="tabpanel-1"
+              />
+            </StyledTabs>
 
             <TabPanel value={tabValue} index={0}>
               <CarTab
                 cars={cars}
                 isLoading={isLoading}
                 error={error}
-                onEditCar={() => {}}
-                onDeleteCar={() => {}}
+                onEditCar={async (car) => {
+                  // ... existing edit car logic ...
+                }}
+                onDeleteCar={async (car) => {
+                  // ... existing delete car logic ...
+                }}
               />
             </TabPanel>
 
             <TabPanel value={tabValue} index={1}>
               <UserTab
                 users={users}
-                onSaveUsers={handleSaveUsers}
                 onEditCheckboxChange={handleUserEditCheckboxChange}
                 onRemoveCheckboxChange={handleUserRemoveCheckboxChange}
+                onSaveUsers={handleSaveUsers}
               />
             </TabPanel>
           </>
         ) : (
-          <Box>
-            <CarTab
-              cars={cars}
-              isLoading={isLoading}
-              error={error}
-              onEditCar={() => {}}
-              onDeleteCar={() => {}}
-            />
-          </Box>
+          // Normal kullanıcı görünümü
+          <CarTab
+            cars={cars}
+            isLoading={isLoading}
+            error={error}
+            onEditCar={async (car) => {
+              // ... existing edit car logic ...
+            }}
+            onDeleteCar={async (car) => {
+              // ... existing delete car logic ...
+            }}
+          />
         )}
-      </Container>
 
-      <Snackbar 
-        open={openSnackbar} 
-        autoHideDuration={3000} 
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <Alert 
-          onClose={handleCloseSnackbar} 
-          severity={snackbarMessage.includes('Failed') ? 'error' : 'success'} 
-          sx={{ width: '100%' }}
+        <Snackbar 
+          open={openSnackbar} 
+          autoHideDuration={3000} 
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </>
+          <Alert 
+            onClose={handleCloseSnackbar} 
+            severity="success"
+            sx={{ 
+              width: '100%',
+              borderRadius: '8px',
+              boxShadow: '0 2px 10px var(--card-shadow)',
+              background: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+      </StyledContainer>
+    </Box>
   );
 } 
