@@ -20,7 +20,20 @@ services:
       - KC_HOSTNAME_STRICT_HTTPS=false
       - KC_HTTP_ENABLED=true
       - KC_PROXY=edge
-    command: start-dev --hostname=localhost --hostname-strict=false --http-enabled=true --proxy-headers=xforwarded --spi-cors-enabled=true --spi-cors-origins=http://localhost:3001 --spi-cors-methods=POST,PUT,DELETE,GET,OPTIONS --spi-cors-headers=Authorization,Content-Type,Accept --spi-cors-credentials=true --spi-cors-max-age=3600
+      - KC_SPI_CONTENT_SECURITY_POLICY_FRAME_SRC="'self' http://localhost:3001"
+      - KC_SPI_CONTENT_SECURITY_POLICY_FRAME_ANCESTORS="'self' http://localhost:3001"
+      - KC_HOSTNAME=localhost:9090
+    command: start-dev --hostname=localhost 
+      --hostname-strict=false 
+      --http-enabled=true 
+      --proxy-headers=xforwarded 
+      --features=token-exchange 
+      --spi-cors-enabled=true 
+      --spi-cors-origins=["http://localhost:3001"] 
+      --spi-cors-methods=["POST","PUT","DELETE","GET","OPTIONS"] 
+      --spi-cors-headers=["Authorization","Content-Type","Accept","X-Requested-With","Origin","Access-Control-Request-Method","Access-Control-Request-Headers"] 
+      --spi-cors-credentials=true 
+      --spi-cors-max-age=3600
 
   otel-collector:
     image: otel/opentelemetry-collector:latest
