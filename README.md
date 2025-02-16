@@ -15,17 +15,8 @@ Ayrıca, aşağıdaki portların boş olduğundan emin olun:
 ## Kurulum
 Aşağıdaki komutları terminalde çalıştırın:
 
-### OpenFGA Kurulumu
 ```sh
-docker run -d -p 8080:8080 -p 8081:8081 -p 3000:3000 openfga/openfga run
-```
-
-### Keycloak Kurulumu
-```sh
-docker run -d -p 9090:8080 \
-  -e KEYCLOAK_ADMIN=admin \
-  -e KEYCLOAK_ADMIN_PASSWORD=admin \
-  quay.io/keycloak/keycloak start-dev
+Root klasoründe docker-compose up komutunun çalıştırılması gerekiyor
 ```
 
 ## Uygulama URL'leri
@@ -114,18 +105,10 @@ Also, make sure that the following ports are free:
 ## Installation
 Run the following commands in the terminal:
 
-### OpenFGA Setup
 ```sh
-docker run -d -p 8080:8080 -p 8081:8081 -p 3000:3000 openfga/openfga run
+The docker-compose up command needs to be executed in the root directory.
 ```
 
-### Keycloak Setup
-```sh
-docker run -d -p 9090:8080 \
-  -e KEYCLOAK_ADMIN=admin \
-  -e KEYCLOAK_ADMIN_PASSWORD=admin \
-  quay.io/keycloak/keycloak start-dev
-```
 
 ## Application URLs
 
