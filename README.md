@@ -1,36 +1,152 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Proje Dokümantasyonu
 
-## Getting Started
+## Gereksinimler
+Bu projeyi çalıştırmak için öncelikle bilgisayarınıza Docker kurulu olmalıdır. 
 
-First, run the development server:
+Ayrıca, aşağıdaki portların boş olduğundan emin olun:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- `8080` (OpenFGA)
+- `8081` (OpenFGA)
+- `3000` (OpenFGA)
+- `9090` (Keycloak)
+- `3001` (Uygulama)
+- `3002` (Websocket)
+
+## Kurulum
+Aşağıdaki komutları terminalde çalıştırın:
+
+### OpenFGA Kurulumu
+```sh
+docker run -d -p 8080:8080 -p 8081:8081 -p 3000:3000 openfga/openfga run
 ```
 
-Open [http://localhost:3001](http://localhost:3001) with your browser to see the result.
+### Keycloak Kurulumu
+```sh
+docker run -d -p 9090:8080 \
+  -e KEYCLOAK_ADMIN=admin \
+  -e KEYCLOAK_ADMIN_PASSWORD=admin \
+  quay.io/keycloak/keycloak start-dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Uygulama URL'leri
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Keycloak Paneli:** [localhost:9090](http://localhost:9090)
+- **OpenFGA Playground:** [localhost:3000/playground](http://localhost:3000/playground)
+- **Uygulama:** [localhost:3001](http://localhost:3001)
 
-## Learn More
+## OpenFGA Konfigürasyonu
 
-To learn more about Next.js, take a look at the following resources:
+1. **OpenFGA Playground** sayfasına gidin: [localhost:3000/playground](http://localhost:3000/playground)
+2. Yeni bir **store** oluşturun ve adını `application` olarak belirleyin.
+3. Aşağıdaki yetkilendirme modelini **Authorization Model** kısmına yapıştırın ve kaydedin:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```plaintext
+model
+  schema 1.1
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+type person
+  relations
+    define admin: [person]
+    define member: [person]
 
-## Deploy on Vercel
+type application
+  relations
+    define admin: [person]
+    define can_assign_delete: admin
+    define can_assign_edit: admin
+    define can_delete: [person] or admin
+    define can_edit: [person] or admin
+    define user: [person]
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. **Sağ üst köşede** bulunan 3 nokta menüsünden **Copy Store ID**'ye tıklayın.
+5. Proje içerisindeki `openfga.ts` dosyasında `STORE_ID` değişkenini güncelleyin.
+6. Aynı menüden **Copy Last Authorization Model ID**'ye tıklayın ve `MODEL_ID` değişkenini güncelleyin.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Keycloak Konfigürasyonu
+
+1. **Keycloak paneline** [localhost:9090](http://localhost:9090) adresinden gidin.
+2. **Admin bilgileri** ile giriş yapın:
+   - **Kullanıcı adı:** `admin`
+   - **Şifre:** `admin`
+3. `next-client` adında bir **client** oluşturun.
+4. Aşağıdaki değerleri girin:
+   - **Valid redirect URIs:** `http://localhost:3001/*`
+   - **Valid post logout redirect URIs:** `http://localhost:3001/*`
+   - **Web origins:** `http://localhost:3001/*`
+5. **Realm Settings** üzerinden **Login** sekmesine gidin ve **User Registration**'u aktif edin.
+
+## Kullanıcı Rolleri ve Yetkiler
+
+Uygulama iki farklı rol tanımlar:
+
+- **Admin**
+- **User**
+
+**Giriş yapan kullanıcının OpenFGA tarafında bir rolü yoksa:**
+
+- Admin olarak giriş yaparsa `admin` rolü atanır.
+- Kullanıcı olarak giriş yaparsa `user` rolü atanır.
+
+### Yetkiler
+
+- **Admin**, araç listesini ve tüm kullanıcıları görebilir.
+- Kullanıcılara yetki verebilir.
+- Yetkiye sahip kullanıcılar, düzenleme ve silme işlemleri yapabilir.
+- Kullanıcının yetkisi güncellendiğinde anlık bildirim gönderilir ve arayüz buna göre güncellenir.
+
+---
+
+# Project Documentation
+
+## Requirements
+Ensure that Docker is installed on your machine.
+
+Also, make sure that the following ports are free:
+
+- `8080` (OpenFGA)
+- `8081` (OpenFGA)
+- `3000` (OpenFGA)
+- `9090` (Keycloak)
+- `3001` (Application)
+- `3002` (Websocket)
+
+## Installation
+Run the following commands in the terminal:
+
+### OpenFGA Setup
+```sh
+docker run -d -p 8080:8080 -p 8081:8081 -p 3000:3000 openfga/openfga run
+```
+
+### Keycloak Setup
+```sh
+docker run -d -p 9090:8080 \
+  -e KEYCLOAK_ADMIN=admin \
+  -e KEYCLOAK_ADMIN_PASSWORD=admin \
+  quay.io/keycloak/keycloak start-dev
+```
+
+## Application URLs
+
+- **Keycloak Panel:** [localhost:9090](http://localhost:9090)
+- **OpenFGA Playground:** [localhost:3000/playground](http://localhost:3000/playground)
+- **Application:** [localhost:3001](http://localhost:3001)
+
+## OpenFGA Configuration
+
+Follow the same steps as mentioned in the Turkish documentation to configure OpenFGA.
+
+## Keycloak Configuration
+
+Follow the same steps as mentioned in the Turkish documentation to configure Keycloak.
+
+## User Roles and Permissions
+
+The application has two roles:
+
+- **Admin**
+- **User**
+
+Refer to the Turkish documentation for role and permission details.
+
