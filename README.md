@@ -11,6 +11,7 @@ Ayrıca, aşağıdaki portların boş olduğundan emin olun:
 - `9090` (Keycloak)
 - `3001` (Uygulama)
 - `3002` (Websocket)
+- `4318` (Open Telemetry)
 
 ## Kurulum
 Root klasoründe docker-compose up komutunun çalıştırılması gerekiyor.
@@ -62,9 +63,9 @@ type application
    - **Şifre:** `admin`
 3. `next-client` adında bir **client** oluşturun.
 4. Aşağıdaki değerleri girin:
-   - **Valid redirect URIs:** `http://localhost:3001/*`
+   - **Valid redirect URIs:** `http://localhost:3001/*, http://localhost:3001/silent-check-sso.html`
    - **Valid post logout redirect URIs:** `http://localhost:3001/*`
-   - **Web origins:** `http://localhost:3001/*`
+   - **Web origins:** `http://localhost:3001`
 5. **Realm Settings** üzerinden **Login** sekmesine gidin ve **User Registration**'u aktif edin.
 
 ## Kullanıcı Rolleri ve Yetkiler
@@ -101,6 +102,7 @@ Also, make sure that the following ports are free:
 - `9090` (Keycloak)
 - `3001` (Application)
 - `3002` (Websocket)
+- `4318` (Open Telemetry)
 
 ## Installation
 The docker-compose up command needs to be executed in the root directory.
