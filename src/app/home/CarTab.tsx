@@ -197,7 +197,16 @@ export default function CarTab({
           console.log('Attempting to connect to WebSocket...');
           ws = new WebSocket('ws://localhost:3002');
 
+          // Add connection timeout
+          const connectionTimeout = setTimeout(() => {
+            if (ws && ws.readyState === WebSocket.CONNECTING) {
+              ws.close();
+              throw new Error('WebSocket connection timeout');
+            }
+          }, 5000); // 5 second timeout
+
           ws.onopen = () => {
+            clearTimeout(connectionTimeout);
             console.log('WebSocket connected successfully');
             setWsConnected(true);
             setReconnectAttempts(0);
