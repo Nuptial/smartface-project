@@ -26,6 +26,7 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import BrokenImageIcon from '@mui/icons-material/BrokenImage';
 
 interface Car {
   image: string;
@@ -65,6 +66,8 @@ export default function CarTab({
   // Add these new state variables
   const [wsConnected, setWsConnected] = useState(false);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
+
+  const [brokenImages, setBrokenImages] = useState<{[key: string]: boolean}>({});
 
   // İlk yetki kontrolü
   useEffect(() => {
@@ -276,6 +279,10 @@ export default function CarTab({
     setPage(newPage);
   };
 
+  const handleImageError = (carTitle: string) => {
+    setBrokenImages(prev => ({...prev, [carTitle]: true}));
+  };
+
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
@@ -290,61 +297,88 @@ export default function CarTab({
 
   return (
     <>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Image</TableCell>
-              <TableCell>Title</TableCell>
-              <TableCell>Start Production</TableCell>
-              <TableCell>Class</TableCell>
-              {(userPermissions.canEdit || userPermissions.canDelete) && (
-                <TableCell align="right">Actions</TableCell>
-              )}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {cars
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((car) => (
-                <TableRow key={car.title}>
-                  <TableCell>
-                    <img
-                      src={car.image}
-                      alt={car.title}
-                      style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                    />
-                  </TableCell>
-                  <TableCell>{car.title}</TableCell>
-                  <TableCell>{car.start_production}</TableCell>
-                  <TableCell>{car.class}</TableCell>
-                  {(userPermissions.canEdit || userPermissions.canDelete) && (
-                    <TableCell align="right">
-                      {userPermissions.canEdit && onEditCar && (
-                        <IconButton onClick={() => handleEditCar(car)}>
-                          <EditIcon />
-                        </IconButton>
-                      )}
-                      {userPermissions.canDelete && onDeleteCar && (
-                        <IconButton onClick={() => handleRemoveCar(car)}>
-                          <DeleteIcon />
-                        </IconButton>
+      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+        <TableContainer>
+          <Table stickyHeader aria-label="sticky table">
+            <TableHead>
+              <TableRow>
+                <TableCell>Image</TableCell>
+                <TableCell>Title</TableCell>
+                <TableCell>Start Production</TableCell>
+                <TableCell>Class</TableCell>
+                {(userPermissions.canEdit || userPermissions.canDelete) && (
+                  <TableCell>Actions</TableCell>
+                )}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {cars
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((car) => (
+                  <TableRow hover role="checkbox" tabIndex={-1} key={car.title}>
+                    <TableCell>
+                      {brokenImages[car.title] ? (
+                        <Box 
+                          sx={{ 
+                            width: 100, 
+                            height: 60, 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            bgcolor: 'grey.200',
+                            borderRadius: 1
+                          }}
+                        >
+                          <BrokenImageIcon sx={{ color: 'grey.500' }} />
+                        </Box>
+                      ) : (
+                        <img
+                          src={car.image}
+                          alt={car.title}
+                          style={{ width: 100, height: 60, objectFit: 'cover' }}
+                          onError={() => handleImageError(car.title)}
+                        />
                       )}
                     </TableCell>
-                  )}
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
+                    <TableCell>{car.title}</TableCell>
+                    <TableCell>{car.start_production}</TableCell>
+                    <TableCell>{car.class}</TableCell>
+                    {(userPermissions.canEdit || userPermissions.canDelete) && (
+                      <TableCell>
+                        {userPermissions.canEdit && onEditCar && (
+                          <IconButton
+                            onClick={() => handleEditCar(car)}
+                            size="small"
+                            color="primary"
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        )}
+                        {userPermissions.canDelete && onDeleteCar && (
+                          <IconButton
+                            onClick={() => handleRemoveCar(car)}
+                            size="small"
+                            color="error"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        )}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
         <TablePagination
           component="div"
           count={cars.length}
+          rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
           rowsPerPageOptions={[10]}
         />
-      </TableContainer>
+      </Paper>
 
       {userPermissions.canEdit && (
         <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
