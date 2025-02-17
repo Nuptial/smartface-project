@@ -55,19 +55,6 @@ type application
 5. Proje içerisindeki `openfga.ts` dosyasında `STORE_ID` değişkenini güncelleyin.
 6. Aynı menüden **Copy Last Authorization Model ID**'ye tıklayın ve `MODEL_ID` değişkenini güncelleyin.
 
-## Keycloak Konfigürasyonu
-
-1. **Keycloak paneline** [localhost:9090](http://localhost:9090) adresinden gidin.
-2. **Admin bilgileri** ile giriş yapın:
-   - **Kullanıcı adı:** `admin`
-   - **Şifre:** `admin`
-3. `next-client` adında bir **client** oluşturun.
-4. Aşağıdaki değerleri girin:
-   - **Valid redirect URIs:** `http://localhost:3001/*, http://localhost:3001/silent-check-sso.html`
-   - **Valid post logout redirect URIs:** `http://localhost:3001/*`
-   - **Web origins:** `http://localhost:3001`
-5. **Realm Settings** üzerinden **Login** sekmesine gidin ve **User Registration**'u aktif edin.
-
 ## Kullanıcı Rolleri ve Yetkiler
 
 Uygulama iki farklı rol tanımlar:
@@ -87,51 +74,6 @@ Uygulama iki farklı rol tanımlar:
 - Yetkiye sahip kullanıcılar, düzenleme ve silme işlemleri yapabilir.
 - Kullanıcının yetkisi güncellendiğinde anlık bildirim gönderilir ve arayüz buna göre güncellenir.
 
----
+### Keycloak Giriş Bilgilari
 
-# Project Documentation
-
-## Requirements
-Ensure that Docker is installed on your machine.
-
-Also, make sure that the following ports are free:
-
-- `8080` (OpenFGA)
-- `8081` (OpenFGA)
-- `3000` (OpenFGA)
-- `9090` (Keycloak)
-- `3001` (Application)
-- `3002` (Websocket)
-- `4318` (Open Telemetry)
-
-## Installation
-The docker-compose up command needs to be executed in the root directory.
-
-```sh
-docker-compose up
-```
-
-
-## Application URLs
-
-- **Keycloak Panel:** [localhost:9090](http://localhost:9090)
-- **OpenFGA Playground:** [localhost:3000/playground](http://localhost:3000/playground)
-- **Application:** [localhost:3001](http://localhost:3001)
-
-## OpenFGA Configuration
-
-Follow the same steps as mentioned in the Turkish documentation to configure OpenFGA.
-
-## Keycloak Configuration
-
-Follow the same steps as mentioned in the Turkish documentation to configure Keycloak.
-
-## User Roles and Permissions
-
-The application has two roles:
-
-- **Admin**
-- **User**
-
-Refer to the Turkish documentation for role and permission details.
-
+username: admin password: admin
