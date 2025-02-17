@@ -23,6 +23,8 @@ services:
       - KC_SPI_CONTENT_SECURITY_POLICY_FRAME_SRC="'self' http://localhost:3001"
       - KC_SPI_CONTENT_SECURITY_POLICY_FRAME_ANCESTORS="'self' http://localhost:3001"
       - KC_HOSTNAME=localhost:9090
+    volumes:
+      - ./keycloak:/opt/keycloak/data/import
     command: start-dev --hostname=localhost 
       --hostname-strict=false 
       --http-enabled=true 
@@ -34,6 +36,7 @@ services:
       --spi-cors-headers=["Authorization","Content-Type","Accept","X-Requested-With","Origin","Access-Control-Request-Method","Access-Control-Request-Headers"] 
       --spi-cors-credentials=true 
       --spi-cors-max-age=3600
+      --import-realm
 
   otel-collector:
     image: otel/opentelemetry-collector:latest
