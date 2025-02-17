@@ -213,7 +213,7 @@ export default function HomePage() {
         const data = await response.json();
         const filteredUsers = data.filter((user: any) => user.username !== 'admin');
         
-        // Her kullanıcı için yetkileri kontrol et
+        // Check permissions for each user
         const usersWithPermissions = await Promise.all(
           filteredUsers.map(async (user: any) => {
             const permissionsResponse = await fetch(`/api/auth/check-permissions?username=${user.username}`, {
@@ -275,12 +275,12 @@ export default function HomePage() {
 
   const handleSaveUsers = async () => {
     try {
-      // Seçili kullanıcıları bul
+      // Find selected users
       const usersToUpdate = users.filter(user => 
         user.editSelected !== undefined || user.removeSelected !== undefined
       );
 
-      // Her bir kullanıcı için yetkileri güncelle
+      // Update permissions for each user
       for (const user of usersToUpdate) {
         const response = await fetch('/api/auth/update-permissions', {
           method: 'POST',
@@ -300,11 +300,11 @@ export default function HomePage() {
         }
       }
 
-      // Başarılı mesajı göster
+      // Show success message
       setSnackbarMessage('User permissions updated successfully');
       setOpenSnackbar(true);
       
-      // Kullanıcı listesini yenile
+      // Refresh user list
       await fetchUsers();
     } catch (error) {
       console.error('Error saving user permissions:', error);
@@ -398,7 +398,7 @@ export default function HomePage() {
             </TabPanel>
           </>
         ) : (
-          // Normal kullanıcı görünümü
+          // Normal user view
           <CarTab
             cars={cars}
             isLoading={isLoading}

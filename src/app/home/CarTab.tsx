@@ -142,7 +142,7 @@ export default function CarTab({
 
   const [brokenImages, setBrokenImages] = useState<{[key: string]: boolean}>({});
 
-  // İlk yetki kontrolü
+  // Initial permission check
   useEffect(() => {
     const checkPermissions = async () => {
       if (keycloak.authenticated && keycloak.token) {
@@ -176,7 +176,7 @@ export default function CarTab({
     checkPermissions();
   }, [keycloak.authenticated, keycloak.token]);
 
-  // WebSocket bağlantısı için useEffect
+  // WebSocket connection useEffect
   useEffect(() => {
     let ws: WebSocket | null = null;
     let reconnectTimeout: NodeJS.Timeout;

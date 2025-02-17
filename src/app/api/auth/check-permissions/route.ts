@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     const adminData = await adminResponse.json();
     const isAdmin = adminData.allowed;
 
-    // Eğer başka bir kullanıcının yetkilerini kontrol ediyorsa admin olmalı
+    // If checking permissions for another user, must be admin
     if (usernameToCheck !== currentUsername && !isAdmin) {
       return NextResponse.json({ error: 'Unauthorized to check other users' }, { status: 403 });
     }

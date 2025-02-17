@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Only admins can assign admin role' }, { status: 403 });
     }
 
-    // Request body'den kullanıcı bilgisini al
+    // Get user information from request body
     const body = await request.json();
     const { username, isAdmin } = body;
 
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Username is required' }, { status: 400 });
     }
 
-    // Admin rolünü güncelle
+    // Update admin role
     const writeBody = {
       authorization_model_id: MODEL_ID,
       writes: {
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // OpenFGA'ya yetki güncellemesini gönder
+    // Send permission update to OpenFGA
     const writeResponse = await fetch(`${OPENFGA_URL}/stores/${STORE_ID}/write`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

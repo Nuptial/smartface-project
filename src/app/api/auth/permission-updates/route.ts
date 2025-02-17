@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       start(controller) {
         const encoder = new TextEncoder();
 
-        // İlk mesajı gönder
+        // Send initial message
         controller.enqueue(encoder.encode('event: connected\ndata: Connection established\n\n'));
 
         // Keep connection alive

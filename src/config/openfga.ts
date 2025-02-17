@@ -1,6 +1,6 @@
 export const OPENFGA_URL = 'http://127.0.0.1:8080';
-export const STORE_ID = "01JM8J51EAWMG4SNXP86QK38S2";
-export const MODEL_ID = "01JM8J536A9RQXHWRVH5DAB19J";
+export const STORE_ID = "01JM9NHJR2YEKRNDR2VF37WTKA";
+export const MODEL_ID = "01JM9NHRJZBEP98KQARQ19R5EN";
 
 // Used to check admin users
 const ADMIN_USERS = new Set(['admin']); // Keycloak admin user
@@ -86,7 +86,7 @@ export const checkUserRole = async (userId: string, role: 'admin' | 'user') => {
     }
   } catch (error) {
     console.error('Error checking role in OpenFGA:', error);
-    return false; // Hata durumunda false dön
+    return false; // Return false in case of error
   }
 };
 

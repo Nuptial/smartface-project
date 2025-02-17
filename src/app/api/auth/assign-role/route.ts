@@ -31,13 +31,13 @@ export async function POST(request: NextRequest) {
 
       console.log('Checking existing role for username:', username);
 
-      // Önce admin rolünü kontrol et
+      // First check admin role
       const isAdmin = await checkUserRole(username, 'admin');
       if (!isAdmin) {
-        // Admin değilse user rolünü kontrol et
+        // If not admin, check user role
         const isUser = await checkUserRole(username, 'user');
         if (!isUser) {
-          // Hiçbir rolü yoksa yeni rol ata
+          // If no role exists, assign new role
           console.log('No existing role found, assigning new role for:', username);
           await assignUserRole(username);
           return NextResponse.json({ 
