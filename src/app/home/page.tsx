@@ -125,7 +125,7 @@ export default function HomePage() {
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState<number | null>(null);
   const [users, setUsers] = useState<KeycloakUser[]>([]);
   const [cars, setCars] = useState<Car[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -133,6 +133,7 @@ export default function HomePage() {
   const [userRole, setUserRole] = useState<'admin' | 'user' | null>(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [isRoleCheckComplete, setIsRoleCheckComplete] = useState(false);
 
   useEffect(() => {
     if (initialized && !keycloak.authenticated) {
@@ -173,8 +174,12 @@ export default function HomePage() {
 
           console.log('Role assignment successful:', data);
           setUserRole(data.role);
+          // Set initial tab based on role
+          setTabValue(data.role === 'admin' ? 1 : 0);
+          setIsRoleCheckComplete(true);
         } catch (error) {
           console.error('Error in role assignment:', error);
+          setIsRoleCheckComplete(true);
         }
       }
     };
@@ -319,6 +324,15 @@ export default function HomePage() {
     }
     setOpenSnackbar(false);
   };
+
+  // Don't render content until role check is complete
+  if (!isRoleCheckComplete || tabValue === null) {
+    return (
+      <LoadingContainer>
+        <CircularProgress />
+      </LoadingContainer>
+    );
+  }
 
   if (isRedirecting || isLoggingOut) {
     return (
