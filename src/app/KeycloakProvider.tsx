@@ -36,7 +36,7 @@ export default function KeycloakProvider({
       LoadingComponent={loadingComponent}
       initOptions={{
         onLoad: 'check-sso',
-        silentCheckSsoRedirectUri: window?.location.origin + '/silent-check-sso.html',
+        silentCheckSsoRedirectUri: typeof window !== 'undefined' ? window.location.origin + '/silent-check-sso.html' : '',
         pkceMethod: 'S256',
         checkLoginIframe: false
       }}

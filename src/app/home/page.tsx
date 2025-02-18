@@ -114,6 +114,7 @@ interface KeycloakUser {
 }
 
 interface Car {
+  id: string;
   image: string;
   title: string;
   start_production: number;
@@ -134,6 +135,7 @@ export default function HomePage() {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [isRoleCheckComplete, setIsRoleCheckComplete] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     if (initialized && !keycloak.authenticated) {
@@ -325,6 +327,87 @@ export default function HomePage() {
     setOpenSnackbar(false);
   };
 
+  const handleEditCar = async (car: Car) => {
+    if (isUpdating) return; // Prevent multiple simultaneous updates
+    
+    try {
+      setIsUpdating(true);
+      const response = await fetch(`/api/cars/${encodeURIComponent(car.id)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${keycloak.token}`
+        },
+        body: JSON.stringify({
+          title: car.title,
+          start_production: car.start_production,
+          class: car.class,
+          image: car.image
+        })
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.error || `Failed to update car: ${response.statusText}`);
+      }
+
+      // Update the car in the local state
+      setCars(prevCars => 
+        prevCars.map(c => 
+          c.id === car.id 
+            ? { ...c, ...responseData.car }
+            : c
+        )
+      );
+      
+      // Show success message
+      setSnackbarMessage(responseData.message || 'Car updated successfully');
+      setOpenSnackbar(true);
+    } catch (error) {
+      console.error('Error updating car:', error);
+      setSnackbarMessage(error instanceof Error ? error.message : 'Failed to update car');
+      setOpenSnackbar(true);
+      throw error;
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDeleteCar = async (car: Car) => {
+    if (isUpdating) return; // Prevent multiple simultaneous updates
+    
+    try {
+      setIsUpdating(true);
+      const response = await fetch(`/api/cars/${encodeURIComponent(car.id)}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${keycloak.token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to delete car: ${response.statusText}`);
+      }
+
+      const responseData = await response.json();
+      
+      // Update the local state
+      setCars(prevCars => prevCars.filter(c => c.id !== car.id));
+      
+      // Show success message
+      setSnackbarMessage('Car deleted successfully');
+      setOpenSnackbar(true);
+    } catch (error) {
+      console.error('Error deleting car:', error);
+      setSnackbarMessage(error instanceof Error ? error.message : 'Failed to delete car');
+      setOpenSnackbar(true);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   // Don't render content until role check is complete
   if (!isRoleCheckComplete || tabValue === null) {
     return (
@@ -393,12 +476,8 @@ export default function HomePage() {
                 cars={cars}
                 isLoading={isLoading}
                 error={error}
-                onEditCar={async (car) => {
-                  // ... existing edit car logic ...
-                }}
-                onDeleteCar={async (car) => {
-                  // ... existing delete car logic ...
-                }}
+                onEditCar={handleEditCar}
+                onDeleteCar={handleDeleteCar}
               />
             </TabPanel>
 
@@ -412,17 +491,12 @@ export default function HomePage() {
             </TabPanel>
           </>
         ) : (
-          // Normal user view
           <CarTab
             cars={cars}
             isLoading={isLoading}
             error={error}
-            onEditCar={async (car) => {
-              // ... existing edit car logic ...
-            }}
-            onDeleteCar={async (car) => {
-              // ... existing delete car logic ...
-            }}
+            onEditCar={handleEditCar}
+            onDeleteCar={handleDeleteCar}
           />
         )}
 
@@ -434,13 +508,11 @@ export default function HomePage() {
         >
           <Alert 
             onClose={handleCloseSnackbar} 
-            severity="success"
+            severity="info"
             sx={{ 
               width: '100%',
               borderRadius: '8px',
-              boxShadow: '0 2px 10px var(--card-shadow)',
-              background: 'rgba(255, 255, 255, 0.9)',
-              backdropFilter: 'blur(10px)'
+              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
             }}
           >
             {snackbarMessage}

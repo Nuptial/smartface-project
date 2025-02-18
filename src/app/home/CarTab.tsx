@@ -30,6 +30,7 @@ import BrokenImageIcon from '@mui/icons-material/BrokenImage';
 import { styled } from '@mui/material/styles';
 
 interface Car {
+  id: string;
   image: string;
   title: string;
   start_production: number;
@@ -347,12 +348,20 @@ export default function CarTab({
 
   const handleEditSave = async () => {
     if (!selectedCar || !onEditCar) return;
-    await onEditCar({
-      ...selectedCar,
-      ...editedCarData,
-      start_production: parseInt(editedCarData.start_production)
-    });
-    handleEditDialogClose();
+    try {
+      const updatedCar = {
+        ...selectedCar,
+        title: editedCarData.title,
+        start_production: parseInt(editedCarData.start_production),
+        class: editedCarData.class
+      };
+      await onEditCar(updatedCar);
+      handleEditDialogClose();
+    } catch (error) {
+      console.error('Error saving car:', error);
+      setSnackbarMessage('Failed to save changes');
+      setOpenSnackbar(true);
+    }
   };
 
   const handleDeleteConfirm = async () => {
@@ -401,7 +410,7 @@ export default function CarTab({
               {cars
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((car) => (
-                  <StyledTableRow key={car.title}>
+                  <StyledTableRow key={car.id}>
                     <TableCell>
                       <ImageContainer>
                         {brokenImages[car.title] ? (
