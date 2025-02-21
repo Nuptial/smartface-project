@@ -1,6 +1,6 @@
 export const OPENFGA_URL = "http://127.0.0.1:8080";
-export const STORE_ID = "01JMB5QPBKFQ0Q7MC4C78C8H3X";
-export const MODEL_ID = "01JMB5QZ97851CZJJYZP2GZG5R";
+export const STORE_ID = "01JMKW5E53C6N85VSXV6B4RS9S";
+export const MODEL_ID = "01JMKW5Y0XR4KGWSNDWYXA5D64";
 
 // Used to check admin users
 const ADMIN_USERS = new Set(["admin"]); // Keycloak admin user

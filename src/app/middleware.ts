@@ -6,16 +6,20 @@ export async function middleware(request: NextRequest) {
   // For request path debugging
   console.log('Middleware triggered for path:', request.nextUrl.pathname);
 
-  const token = request.cookies.get('keycloak-token');
+  // Get the authorization header
+  const authHeader = request.headers.get('authorization');
   
-  if (!token) {
-    console.log('No token found');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.log('No valid authorization header found');
     return NextResponse.next();
   }
 
   try {
+    // Extract the token from Bearer header
+    const token = authHeader.split(' ')[1];
+    
     // Parse the JWT token to get user info
-    const tokenData = JSON.parse(atob(token.value.split('.')[1]));
+    const tokenData = JSON.parse(atob(token.split('.')[1]));
     
     // Use username from Keycloak
     const username = tokenData.preferred_username || tokenData.username || tokenData.sub;
